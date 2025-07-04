@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The $1.6B Hype Machine: An Interactive Analysis of the Labubu Craze</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a single-page, scrollable dashboard with a sticky top navigation for easy access to five core thematic sections: 'The Phenomenon', 'The Strategy', 'The Psychology', 'The Numbers', and 'The Legacy'. This structure was chosen to deconstruct the linear report into a more exploratory, user-driven experience. Instead of forcing users to read top-to-bottom, they can jump directly to the topic of interest—be it the financial data, the marketing tactics, or the cultural comparisons. Key interactions include a clickable timeline to reveal milestone details, interactive charts to visualize financial performance, and a dynamic comparison module to contrast Labubu with historical crazes. This non-linear, thematic architecture enhances usability by allowing users to synthesize information based on their own interests, making the dense report content more digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+    - Report Info: Key popularity milestones -> Goal: Show change over time -> Viz: Interactive Timeline (HTML/CSS/JS) -> Interaction: Click on year to see details -> Justification: More engaging and space-efficient than a long list.
+    - Report Info: Financial data (revenue, growth) -> Goal: Compare components of success -> Viz: Bar Chart (Chart.js/Canvas) -> Interaction: Hover tooltips for precise data -> Justification: Clearly visualizes the scale of financial growth and Labubu's contribution versus other revenue streams.
+    - Report Info: Resale values -> Goal: Inform about market dynamics -> Viz: Interactive Table (HTML/Tailwind/JS) -> Interaction: Hover highlights -> Justification: Presents specific, high-impact examples of the secondary market boom in a clear, organized format.
+    - Report Info: Comparison to other crazes -> Goal: Compare market strategies -> Viz: Dynamic Content Switcher (HTML/JS) -> Interaction: Click buttons to load different collectible data -> Justification: Allows for direct, one-to-one comparison in a compact space, making the analysis more direct and interactive than a static table.
+    - Report Info: Labubu's aesthetic -> Goal: Inform and engage -> Viz: CSS-drawn Labubu face -> Interaction: Static visual anchor -> Justification: Adheres to the 'no raster images' rule while creating a strong visual identity for the page.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #D39F5D;
+            border-bottom-color: #D39F5D;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 800px;
+            max-height: 400px;
+        }
+        .labubu-face {
+            width: 120px;
+            height: 120px;
+            background: #EAE3D9;
+            border-radius: 50% 50% 40% 40%;
+            position: relative;
+            margin: 0 auto;
+            border: 3px solid #BFB6A8;
+        }
+        .labubu-ear {
+            width: 20px;
+            height: 70px;
+            background: #EAE3D9;
+            border: 3px solid #BFB6A8;
+            position: absolute;
+            top: -40px;
+            border-radius: 50% 50% 0 0;
+        }
+        .ear-left {
+            left: 20px;
+            transform: rotate(-15deg);
+        }
+        .ear-right {
+            right: 20px;
+            transform: rotate(15deg);
+        }
+        .labubu-eye {
+            width: 25px;
+            height: 25px;
+            background: #4A4A4A;
+            border-radius: 50%;
+            position: absolute;
+            top: 40px;
+        }
+        .eye-left { left: 25px; }
+        .eye-right { right: 25px; }
+        .labubu-mouth {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+        }
+        .labubu-tooth {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 10px solid #4A4A4A;
+            margin: 0 1px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-center h-16">
+                <div class="flex space-x-4 md:space-x-8 text-sm md:text-base">
+                    <a href="#phenomenon" class="nav-link border-b-2 border-transparent pb-1">The Phenomenon</a>
+                    <a href="#strategy" class="nav-link border-b-2 border-transparent pb-1">The Strategy</a>
+                    <a href="#psychology" class="nav-link border-b-2 border-transparent pb-1">The Psychology</a>
+                    <a href="#numbers" class="nav-link border-b-2 border-transparent pb-1">The Numbers</a>
+                    <a href="#legacy" class="nav-link border-b-2 border-transparent pb-1">The Legacy</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="hero" class="text-center py-12 md:py-20">
+            <div class="labubu-face mb-8">
+                <div class="labubu-ear ear-left"></div>
+                <div class="labubu-ear ear-right"></div>
+                <div class="labubu-eye eye-left"></div>
+                <div class="labubu-eye eye-right"></div>
+                <div class="labubu-mouth">
+                    <div class="labubu-tooth"></div><div class="labubu-tooth"></div><div class="labubu-tooth"></div><div class="labubu-tooth"></div><div class="labubu-tooth"></div><div class="labubu-tooth"></div>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4">The $1.6B Hype Machine</h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-600">
+                An interactive analysis of how the "ugly-cute" Labubu doll, a character born from folklore, was transformed into a global pop culture icon and a financial powerhouse by retailer Pop Mart.
+            </p>
+        </section>
+
+        <div class="space-y-16 md:space-y-24">
+
+            <section id="phenomenon">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Phenomenon</h2>
+                    <p class="mt-2 max-w-2xl mx-auto text-gray-600">This section explores the origins of Labubu and charts its explosive rise to fame. Discover the key moments that defined its journey from an artist's sketchbook to a worldwide sensation through the interactive timeline below.</p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <h3 class="text-xl font-bold text-center mb-8 text-gray-700">A Timeline of a Craze</h3>
+                    <div class="relative">
+                        <div class="absolute left-1/2 h-full w-0.5 bg-gray-300 transform -translate-x-1/2"></div>
+                        <div id="timeline-container" class="space-y-12"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="strategy">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Strategy: Engineering the Hype</h2>
+                    <p class="mt-2 max-w-2xl mx-auto text-gray-600">Pop Mart didn't just sell a toy; it engineered a cultural phenomenon. This section deconstructs the four key pillars of its marketing playbook, revealing the sophisticated tactics used to create scarcity, virality, and intense consumer demand.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                        <h3 class="font-bold text-xl mb-2 text-gray-800">1. The Power of the Blind Box</h3>
+                        <p class="text-gray-600">By selling toys in sealed, mystery packaging, Pop Mart gamified the shopping experience. This tactic taps into the "gambler's mentality," creating a dopamine rush and compelling collectors to chase rare "secret" figures, turning a simple purchase into a thrilling hunt.</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                        <h3 class="font-bold text-xl mb-2 text-gray-800">2. The Celebrity Amplification Loop</h3>
+                        <p class="text-gray-600">When stars like Blackpink's Lisa and Rihanna were seen with Labubu, it transformed the toy into a must-have fashion accessory. This celebrity endorsement created a powerful "fear of missing out" (FOMO), amplified by millions of #Labubu posts on TikTok and Instagram.</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                        <h3 class="font-bold text-xl mb-2 text-gray-800">3. Engineered Scarcity & Collaborations</h3>
+                        <p class="text-gray-600">Limited edition releases and high-profile collaborations with brands like Coca-Cola and artists like Pharrell Williams fuel intense demand. Items sell out in minutes and reappear on resale markets for thousands, turning the toys into status symbols.</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                        <h3 class="font-bold text-xl mb-2 text-gray-800">4. Aggressive Global Expansion</h3>
+                        <p class="text-gray-600">From its origins in China, Pop Mart rapidly expanded worldwide, opening hundreds of stores and "roboshops" in over 30 countries. Its app topped US shopping charts, making Labubu accessible to a global audience and cementing its international reach.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="psychology">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Psychology: Why the Obsession?</h2>
+                    <p class="mt-2 max-w-2xl mx-auto text-gray-600">What drives adults to queue for hours and spend hundreds on a toy doll? This section delves into the psychological drivers behind the Labubu craze, exploring how it taps into deep-seated needs for comfort, identity, and social connection.</p>
+                </div>
+
+                <div class="max-w-3xl mx-auto">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">The "Kidult" Phenomenon</h3>
+                            <p class="text-gray-600">Adults find emotional comfort and stress relief in toys that evoke nostalgia. Labubu offers a form of escapism and a way to "heal your inner child," providing simple joy in a complex world. The brand's largest demographic is adults buying for themselves.</p>
+                        </div>
+                         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">The "Kimo-Kawaii" (Ugly-Cute) Appeal</h3>
+                            <p class="text-gray-600">Labubu's blend of creepy and cute stands out. This "ugly-cute" aesthetic, a mix of Nordic folklore and East Asian kawaii, resonates with Gen Z's appreciation for authenticity and imperfection. It's a symbol of individual taste that defies conventional cuteness.</p>
+                        </div>
+                         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">A Fashion Accessory & Status Symbol</h3>
+                            <p class="text-gray-600">Labubu is more than a toy; it's a wearable accessory. Attaching a Labubu charm to a handbag has become a fashion statement, blending high fashion with pop culture. Owning one acts as "social currency," signaling you're in on the latest trend.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="numbers">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Numbers: A Financial Powerhouse</h2>
+                    <p class="mt-2 max-w-2xl mx-auto text-gray-600">The Labubu craze translated into staggering financial success. This section visualizes the key metrics, from Pop Mart's explosive revenue growth to the eye-watering prices on the secondary market. Interact with the chart to see the data.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center mb-12">
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-3xl font-bold text-amber-600">$1.81B</p>
+                        <p class="text-sm text-gray-600">Pop Mart Revenue (2024)</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-3xl font-bold text-amber-600">>1,200%</p>
+                        <p class="text-sm text-gray-600">Plush Toy Revenue Growth</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-3xl font-bold text-amber-600">$44.4B</p>
+                        <p class="text-sm text-gray-600">Market Cap (June 2025)</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-3xl font-bold text-amber-600">$1.6B</p>
+                        <p class="text-sm text-gray-600">CEO's Net Worth Gain (1 Day)</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-12">
+                     <h3 class="text-xl font-bold text-center mb-4 text-gray-700">Pop Mart Revenue & "The Monsters" Contribution (2024)</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="text-xl font-bold text-center mb-4 text-gray-700">Resale Market Madness: Price Markups</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 text-sm font-semibold tracking-wide">Item</th>
+                                    <th class="p-3 text-sm font-semibold tracking-wide">Retail Price</th>
+                                    <th class="p-3 text-sm font-semibold tracking-wide">Resale Price</th>
+                                    <th class="p-3 text-sm font-semibold tracking-wide">Markup</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="resale-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="legacy">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Legacy: Lessons from History</h2>
+                    <p class="mt-2 max-w-2xl mx-auto text-gray-600">Is Labubu just another fad, or has it built a sustainable IP? This section compares the Labubu phenomenon to historical collectible crazes like Beanie Babies and Funko Pop, analyzing what makes its strategy different in the digital age.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="text-xl font-bold text-center mb-6 text-gray-700">Collectible Craze Comparison</h3>
+                    <div id="comparison-controls" class="flex justify-center space-x-2 mb-6"></div>
+                    <div id="comparison-content" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="text-center p-8 mt-16 border-t border-gray-200">
+        <p class="text-gray-500 text-sm">Interactive analysis based on the report: "The $1.6B Hype Machine: How the Ugly Doll Labubu Became a Global Craze".</p>
+         <p class="text-gray-500 text-sm mt-1">Created for educational and analytical purposes.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const timelineData = [
+                { year: 2015, title: 'The Genesis', text: 'Artist Kasing Lung introduces Labubu as part of "The Monsters" story series, inspired by Nordic folklore.' },
+                { year: 2019, title: 'Pop Mart Collaboration', text: 'An exclusive collaboration with Pop Mart leads to the first Labubu blind box series, gaining wider recognition.' },
+                { year: 2020, title: 'Pivotal Redesign', text: 'A design shift to a more broadly appealing "quirky-cute" style solidifies its signature look and broadens its market.' },
+                { year: 2023, title: 'The Fashion Accessory', text: 'Pop Mart introduces Labubu plush key rings, a strategic move that integrates the toy into the "bag charm" trend.' },
+                { year: 2024, title: 'Viral Explosion', text: 'Popularity explodes, driven by celebrity endorsements (notably Blackpink\'s Lisa) and massive social media virality.' },
+                { year: 2025, title: 'Cultural Icon Status', text: 'Momentum continues with high-profile art collaborations (Art Basel), record-breaking auction sales, and the Pop Mart app topping US charts.' }
+            ];
+
+            const resaleData = [
+                { item: 'Human-sized Labubu', retail: 'N/A', resale: '$150,000+', markup: 'Auction Sale' },
+                { item: 'Art Basel Limited Edition', retail: '~ $245', resale: 'Up to $5,000', markup: '> 20x' },
+                { item: 'Pharrell/Sacai Collab', retail: 'N/A', resale: '$31,250', markup: 'Auction Record' },
+                { item: '"Big Into Energy" Plushes', retail: '$168', resale: '$268', markup: '~ 1.6x' },
+                { item: 'Standard Blind Box', retail: '$35 - $130', resale: '> 5x Retail', markup: '> 5x' }
+            ];
+
+            const comparisonData = {
+                'Labubu': {
+                    strategy: 'IP Control, Blind Box, Digital Virality, Fashion Integration',
+                    drivers: 'Gamification, FOMO, Emotional Comfort, Status Symbol',
+                    outcome: 'Sustained IP, Rapid Global Growth, High Secondary Market',
+                    color: 'bg-amber-100',
+                    textColor: 'text-amber-800'
+                },
+                'Beanie Babies': {
+                    strategy: 'False Scarcity (Retirement), Limited Retailers, Early eBay',
+                    drivers: '"Gotta-have-it" Culture, Speculative Investment',
+                    outcome: 'Fad, Market Collapse, Widespread Counterfeits',
+                    color: 'bg-red-100',
+                    textColor: 'text-red-800'
+                },
+                'Funko Pop': {
+                    strategy: 'Extensive Licensing, Exclusive Editions, Strong Community',
+                    drivers: 'Nostalgia, Intrigue of Exclusivity, Fandom',
+                    outcome: 'Sustained IP, Consistent Growth, Active Secondary Market',
+                    color: 'bg-blue-100',
+                    textColor: 'text-blue-800'
+                },
+                'Pokémon Cards': {
+                    strategy: 'Blind Packs, Regular New Sets, Organized Play',
+                    drivers: 'Thrill of the Hunt, Speculation, Strong Community',
+                    outcome: 'Enduring Popularity, Prone to Speculative Bubbles',
+                    color: 'bg-yellow-100',
+                    textColor: 'text-yellow-800'
+                }
+            };
+
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineData.forEach((item, index) => {
+                const isLeft = index % 2 === 0;
+                const timelineElement = `
+                    <div class="relative">
+                        <div class="flex items-center ${isLeft ? 'flex-row-reverse' : ''}">
+                            <div class="w-1/2">
+                                <div class="${isLeft ? 'text-right pr-8' : 'text-left pl-8'}">
+                                    <p class="text-xl font-bold text-amber-600">${item.year}</p>
+                                    <h4 class="font-semibold text-gray-800">${item.title}</h4>
+                                    <p class="text-gray-600 text-sm">${item.text}</p>
+                                </div>
+                            </div>
+                            <div class="w-1/2 flex justify-center">
+                                <div class="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-amber-600 rounded-full border-2 border-white"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                timelineContainer.innerHTML += timelineElement;
+            });
+            
+            const resaleTable = document.getElementById('resale-table');
+            resaleData.forEach(item => {
+                const row = `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 text-sm font-medium text-gray-700">${item.item}</td>
+                        <td class="p-3 text-sm text-gray-600">${item.retail}</td>
+                        <td class="p-3 text-sm text-gray-600 font-semibold">${item.resale}</td>
+                        <td class="p-3 text-sm font-bold text-green-600">${item.markup}</td>
+                    </tr>
+                `;
+                resaleTable.innerHTML += row;
+            });
+            
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pop Mart Total Revenue', '"The Monsters" Franchise', 'Plush Toy Category Revenue'],
+                    datasets: [{
+                        label: 'Revenue in USD (2024)',
+                        data: [1810, 419, 398.2],
+                        backgroundColor: [
+                            'rgba(211, 159, 93, 0.6)',
+                            'rgba(191, 182, 168, 0.6)',
+                            'rgba(74, 74, 74, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(211, 159, 93, 1)',
+                            'rgba(191, 182, 168, 1)',
+                            'rgba(74, 74, 74, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `$${context.raw.toLocaleString()} Million`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Revenue (in Millions USD)' }
+                        }
+                    }
+                }
+            });
+
+            const comparisonControls = document.getElementById('comparison-controls');
+            const comparisonContent = document.getElementById('comparison-content');
+            
+            Object.keys(comparisonData).forEach(key => {
+                const button = document.createElement('button');
+                button.textContent = key;
+                button.className = `px-4 py-2 text-sm font-medium rounded-md transition ${comparisonData[key].color} ${comparisonData[key].textColor}`;
+                button.dataset.key = key;
+                comparisonControls.appendChild(button);
+            });
+
+            function updateComparison(key) {
+                const data = comparisonData[key];
+                comparisonContent.innerHTML = `
+                    <div class="md:col-span-2 text-center">
+                        <h4 class="text-2xl font-bold ${data.textColor}">${key}</h4>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-gray-700">Key Strategies</h5>
+                        <p class="text-gray-600">${data.strategy}</p>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-gray-700">Psychological Drivers</h5>
+                        <p class="text-gray-600">${data.drivers}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h5 class="font-semibold text-gray-700">Market Outcome</h5>
+                        <p class="text-gray-600">${data.outcome}</p>
+                    </div>
+                `;
+                 comparisonControls.querySelectorAll('button').forEach(btn => {
+                    if (btn.dataset.key === key) {
+                        btn.classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+                    } else {
+                        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500');
+                    }
+                });
+            }
+            
+            comparisonControls.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    updateComparison(e.target.dataset.key);
+                }
+            });
+
+            updateComparison('Labubu');
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section[id]');
+            
+            function updateActiveLink() {
+                let index = sections.length;
+                while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+                
+                navLinks.forEach((link) => link.classList.remove('active'));
+                if (index >= 0) {
+                   const activeLink = document.querySelector(`.nav-link[href="#${sections[index].id}"]`);
+                   if(activeLink) activeLink.classList.add('active');
+                }
+            }
+
+            window.addEventListener('scroll', updateActiveLink);
+            updateActiveLink();
+        });
+    </script>
+</body>
+</html>
